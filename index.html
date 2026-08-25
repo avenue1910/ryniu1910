@@ -1,0 +1,507 @@
+<title>九类用户画像卡可视化</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+  min-height: 100vh;
+}
+.container { max-width: 1600px; margin: 0 auto; }
+.header {
+  text-align: center;
+  color: white;
+  margin-bottom: 30px;
+}
+.header h1 { font-size: 2.5em; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+.header p { font-size: 1.1em; opacity: 0.9; }
+.controls {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+}
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  background: white;
+  color: #667eea;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 14px;
+}
+.btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+.btn.active { background: #667eea; color: white; }
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  gap: 25px;
+}
+.card {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+.card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.2); }
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+  position: relative;
+  z-index: 1;
+}
+.card-title {
+  font-size: 1.4em;
+  font-weight: 700;
+  color: #2d3748;
+  flex: 1;
+}
+.efficiency-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 0.9em;
+  white-space: nowrap;
+}
+.efficiency-high { background: #48bb78; color: white; }
+.efficiency-medium { background: #ed8936; color: white; }
+.efficiency-low { background: #fc8181; color: white; }
+.card-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.metric {
+  background: #f7fafc;
+  padding: 12px;
+  border-radius: 8px;
+  border-left: 4px solid #667eea;
+}
+.metric-label {
+  font-size: 0.75em;
+  color: #718096;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.metric-value {
+  font-size: 1.3em;
+  font-weight: 700;
+  color: #2d3748;
+}
+.section {
+  margin-bottom: 20px;
+}
+.section-title {
+  font-size: 0.85em;
+  font-weight: 700;
+  color: #4a5568;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.price-bars {
+  display: flex;
+  height: 40px;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+.price-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75em;
+  color: white;
+  font-weight: 600;
+  transition: all 0.3s;
+}
+.price-bar:hover { filter: brightness(1.1); transform: scaleY(1.1); }
+.price-0-2 { background: #9f7aea; }
+.price-2-3 { background: #667eea; }
+.price-3-4 { background: #4299e1; }
+.price-4-6 { background: #48bb78; }
+.price-6plus { background: #ed8936; }
+.preference-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.tag {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.8em;
+  font-weight: 600;
+  background: #e6fffa;
+  color: #234e52;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.tag-high { background: #c6f6d5; color: #22543d; }
+.tag-medium { background: #feebc8; color: #7c2d12; }
+.actions {
+  background: #fef5e7;
+  padding: 12px;
+  border-radius: 8px;
+  border-left: 4px solid #f59e0b;
+}
+.actions-list {
+  font-size: 0.85em;
+  color: #744210;
+  line-height: 1.6;
+}
+.demo-chart {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.demo-bar {
+  flex: 1;
+  height: 60px;
+  background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  color: white;
+  font-size: 0.7em;
+  font-weight: 600;
+  padding: 4px;
+  transition: all 0.3s;
+}
+.demo-bar:hover { transform: translateY(-4px); }
+.persona-icon {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 120px;
+  height: 120px;
+  opacity: 0.08;
+  pointer-events: none;
+}
+@media (max-width: 768px) {
+  .cards { grid-template-columns: 1fr; }
+  .card-metrics { grid-template-columns: 1fr; }
+}
+</style>
+
+<div class="container">
+  <div class="header">
+    <h1>🎯 九类用户画像卡</h1>
+    <p>617,924 付费用户 | 254.3 万收入 | 2026-07-20~08-19</p>
+  </div>
+
+  <div class="controls">
+    <button class="btn active" onclick="sortCards('efficiency')">按效率排序</button>
+    <button class="btn" onclick="sortCards('users')">按人数排序</button>
+    <button class="btn" onclick="sortCards('revenue')">按收入排序</button>
+    <button class="btn" onclick="filterCards('all')">全部</button>
+    <button class="btn" onclick="filterCards('皮肤系')">皮肤系</button>
+    <button class="btn" onclick="filterCards('搭子')">搭子</button>
+    <button class="btn" onclick="filterCards('字体壁纸')">字体壁纸</button>
+  </div>
+
+  <div class="cards" id="cardsContainer"></div>
+</div>
+
+<script>
+const data = [
+  {
+    name: "首购·皮肤系",
+    users: 279701,
+    usersPct: "45.26%",
+    revenue: 1000704,
+    revenuePct: "39.35%",
+    efficiency: 0.87,
+    arppu: 3.58,
+    orders: 1.63,
+    female: "58.4%",
+    young: "77.5%",
+    price: [45.6, 20.7, 15.6, 17.7, 0.4],
+    prefs: [
+      {name: "星选皮肤", val: 63.47},
+      {name: "超级皮肤", val: 37.74},
+      {name: "壁纸", val: 12.22},
+      {name: "字体", val: 5.29}
+    ],
+    actions: "首单后24h/3天/7天三波推送；低价引流款保持供给；桌面首页精选位"
+  },
+  {
+    name: "老客复购·皮肤系",
+    users: 82796,
+    usersPct: "13.4%",
+    revenue: 700513,
+    revenuePct: "27.54%",
+    efficiency: 2.06,
+    arppu: 8.46,
+    orders: 3.62,
+    female: "74.7%",
+    young: "80.5%",
+    price: [42.3, 20.4, 18.6, 17.8, 0.9],
+    prefs: [
+      {name: "星选皮肤", val: 59},
+      {name: "超级皮肤", val: 58.4},
+      {name: "壁纸", val: 31.64},
+      {name: "字体", val: 12.99}
+    ],
+    actions: "套装化运营(皮肤+壁纸+字体)；会员/订阅制试点；高价值内容优先推送"
+  },
+  {
+    name: "老客单笔·皮肤系",
+    users: 104180,
+    usersPct: "16.86%",
+    revenue: 264900,
+    revenuePct: "10.42%",
+    efficiency: 0.62,
+    arppu: 2.54,
+    orders: 1,
+    female: "70.9%",
+    young: "77.9%",
+    price: [30.5, 24.3, 21.6, 23.4, 0.2],
+    prefs: [
+      {name: "星选皮肤", val: 56.97},
+      {name: "超级皮肤", val: 37.51},
+      {name: "盲盒", val: 5.1}
+    ],
+    actions: "二单召回push(距上次14天)；可直接推3-6元内容不用怕"
+  },
+  {
+    name: "首购·搭子",
+    users: 27450,
+    usersPct: "4.44%",
+    revenue: 191138,
+    revenuePct: "7.52%",
+    efficiency: 1.69,
+    arppu: 6.96,
+    orders: 1.56,
+    female: "81.1%",
+    young: "91.6%",
+    price: [15.0, 5.6, 6.5, 36.0, 36.8],
+    prefs: [
+      {name: "光标搭子", val: 100},
+      {name: "星选皮肤", val: 12.48},
+      {name: "超级皮肤", val: 8.16},
+      {name: "字体", val: 7.74}
+    ],
+    actions: "主推桌面首页/搜索；定价放心往4-6元走；女性向年轻向题材优先"
+  },
+  {
+    name: "老客复购·搭子",
+    users: 8418,
+    usersPct: "1.36%",
+    revenue: 97438,
+    revenuePct: "3.83%",
+    efficiency: 2.81,
+    arppu: 11.57,
+    orders: 3.01,
+    female: "82.1%",
+    young: "90.5%",
+    price: [24.1, 10.3, 10.7, 24.8, 30.1],
+    prefs: [
+      {name: "光标搭子", val: 100},
+      {name: "星选皮肤", val: 44.02},
+      {name: "超级皮肤", val: 30.23},
+      {name: "字体", val: 18}
+    ],
+    actions: "从皮肤复购用户里捞(已买≥2单皮肤+未买搭子)；皮肤+搭子组合装；高价内容试水人群"
+  },
+  {
+    name: "老客单笔·搭子",
+    users: 14804,
+    usersPct: "2.4%",
+    revenue: 83773,
+    revenuePct: "3.29%",
+    efficiency: 1.37,
+    arppu: 5.66,
+    orders: 1,
+    female: "81.5%",
+    young: "91.1%",
+    price: [0, 0, 0.3, 35.2, 64.5],
+    prefs: [
+      {name: "光标搭子", val: 100}
+    ],
+    actions: "推新款搭子召回；尝试搭子订阅制(月更)"
+  },
+  {
+    name: "首购·字体壁纸",
+    users: 69657,
+    usersPct: "11.27%",
+    revenue: 133725,
+    revenuePct: "5.26%",
+    efficiency: 0.47,
+    arppu: 1.92,
+    orders: 1.31,
+    female: "70.5%",
+    young: "86.6%",
+    price: [74.9, 9.5, 14.7, 0.7, 0.2],
+    prefs: [
+      {name: "字体", val: 81.31},
+      {name: "壁纸", val: 23.07},
+      {name: "星选皮肤", val: 7.62}
+    ],
+    actions: "把供给从0-2元搬到3-6元(立即见效)；低价引流不追求人均"
+  },
+  {
+    name: "老客复购·字体壁纸",
+    users: 7484,
+    usersPct: "1.21%",
+    revenue: 35781,
+    revenuePct: "1.41%",
+    efficiency: 1.16,
+    arppu: 4.78,
+    orders: 3,
+    female: "73.8%",
+    young: "83.6%",
+    price: [66.6, 15.7, 15.4, 1.9, 0.4],
+    prefs: [
+      {name: "字体", val: 83.12},
+      {name: "星选皮肤", val: 39.52},
+      {name: "壁纸", val: 35.84}
+    ],
+    actions: "跨品类率49%推皮肤转化率高；字体壁纸是皮肤引流入口"
+  },
+  {
+    name: "老客单笔·字体壁纸",
+    users: 23434,
+    usersPct: "3.79%",
+    revenue: 35222,
+    revenuePct: "1.38%",
+    efficiency: 0.37,
+    arppu: 1.5,
+    orders: 1,
+    female: "73.2%",
+    young: "86.8%",
+    price: [76.1, 5.0, 18.5, 0.2, 0.1],
+    prefs: [
+      {name: "字体", val: 77.07},
+      {name: "壁纸", val: 22.93}
+    ],
+    actions: "召回难度大价值低非重点；如要动推3-6元皮肤升档"
+  }
+];
+
+let currentData = [...data];
+let currentFilter = 'all';
+
+function formatNum(n) {
+  return n.toLocaleString('zh-CN');
+}
+
+function getEfficiencyClass(eff) {
+  if (eff >= 1.5) return 'efficiency-high';
+  if (eff >= 0.8) return 'efficiency-medium';
+  return 'efficiency-low';
+}
+
+function renderCard(item) {
+  const effClass = getEfficiencyClass(item.efficiency);
+
+  const priceHTML = item.price.map((p, i) => {
+    const labels = ['0-2元', '2-3元', '3-4元', '4-6元', '6元+'];
+    const classes = ['price-0-2', 'price-2-3', 'price-3-4', 'price-4-6', 'price-6plus'];
+    return p > 0 ? `<div class="price-bar ${classes[i]}" style="width: ${p}%">${p >= 10 ? labels[i] : ''}</div>` : '';
+  }).join('');
+
+  const prefsHTML = item.prefs.map(p => {
+    const cls = p.val >= 50 ? 'tag-high' : p.val >= 20 ? 'tag-medium' : '';
+    return `<span class="tag ${cls}">${p.name} ${p.val}%</span>`;
+  }).join('');
+
+  return `
+    <div class="card" data-name="${item.name}">
+      <svg class="persona-icon" viewBox="0 0 100 100">
+        <circle cx="50" cy="35" r="18" fill="currentColor"/>
+        <path d="M20,85 Q20,55 50,55 Q80,55 80,85 Z" fill="currentColor"/>
+      </svg>
+      <div class="card-header">
+        <div class="card-title">${item.name}</div>
+        <div class="efficiency-badge ${effClass}">${item.efficiency}x</div>
+      </div>
+      <div class="card-metrics">
+        <div class="metric">
+          <div class="metric-label">人数</div>
+          <div class="metric-value">${formatNum(item.users)}</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">收入</div>
+          <div class="metric-value">¥${(item.revenue/10000).toFixed(1)}万</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">人均</div>
+          <div class="metric-value">¥${item.arppu}</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">订单/人</div>
+          <div class="metric-value">${item.orders}</div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-title">📊 价格分布（订单占比）</div>
+        <div class="price-bars">${priceHTML}</div>
+      </div>
+      <div class="section">
+        <div class="section-title">💎 内容偏好</div>
+        <div class="preference-tags">${prefsHTML}</div>
+      </div>
+      <div class="section">
+        <div class="section-title">👥 画像</div>
+        <div style="display: flex; gap: 10px; font-size: 0.85em; color: #4a5568;">
+          <span>👩 女性 ${item.female}</span>
+          <span>🎯 00+10后 ${item.young}</span>
+        </div>
+      </div>
+      <div class="actions">
+        <div class="section-title" style="color: #92400e; margin-bottom: 8px;">🎯 运营动作</div>
+        <div class="actions-list">${item.actions}</div>
+      </div>
+    </div>
+  `;
+}
+
+function renderCards() {
+  const container = document.getElementById('cardsContainer');
+  container.innerHTML = currentData.map(renderCard).join('');
+}
+
+function sortCards(type) {
+  document.querySelectorAll('.controls .btn').forEach(b => {
+    if (b.textContent.includes('排序')) b.classList.remove('active');
+  });
+  event.target.classList.add('active');
+
+  if (type === 'efficiency') {
+    currentData.sort((a, b) => b.efficiency - a.efficiency);
+  } else if (type === 'users') {
+    currentData.sort((a, b) => b.users - a.users);
+  } else if (type === 'revenue') {
+    currentData.sort((a, b) => b.revenue - a.revenue);
+  }
+  renderCards();
+}
+
+function filterCards(category) {
+  currentFilter = category;
+  if (category === 'all') {
+    currentData = [...data];
+  } else {
+    currentData = data.filter(d => d.name.includes(category));
+  }
+  sortCards('efficiency');
+  renderCards();
+}
+
+// 初始渲染
+sortCards('efficiency');
+</script>
