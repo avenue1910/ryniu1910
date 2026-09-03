@@ -1,0 +1,774 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>超级皮肤 · 深色版</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+:root {
+  --accent:#a78bfa; --accent2:#f472b6;
+  --bg:rgba(12,12,20,0.55); --bg2:rgba(20,20,31,0.6);
+  --card:rgba(28,28,42,0.75); --card2:rgba(34,34,58,0.78);
+  --border:rgba(167,139,250,0.15); --border2:rgba(167,139,250,0.28);
+  --text:#f0eeff; --sub:#c4b9f0; --muted:#6b6b8a;
+  --shadow:rgba(0,0,0,0.35);
+}
+html, body { width:100%; height:100%; overflow:hidden; background:#0a0a12; }
+
+/* ── 手机外壳 ── */
+.phone-shell { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:#0a0a12; }
+.phone-frame {
+  width:393px; height:852px; max-width:100vw; max-height:100vh;
+  position:relative; overflow:hidden;
+  background: url('https://ime-res-download.xfinfr.com/open-platform/c5a8a121ae3242688324230b643df948.png') center center / cover no-repeat, var(--bg);
+  border-radius:54px;
+  box-shadow:0 0 0 10px #1a1a2e, 0 0 0 12px #252540, 0 30px 80px rgba(0,0,0,0.6);
+}
+@media (max-width:480px) { .phone-frame { border-radius:0; box-shadow:none; width:100vw; height:100vh; } }
+
+/* 刘海 */
+.phone-notch {
+  position:absolute; top:10px; left:50%; transform:translateX(-50%);
+  width:120px; height:34px; background:#1a1525; border-radius:20px; z-index:200;
+  display:flex; align-items:center; justify-content:center; gap:6px;
+}
+.notch-cam { width:12px; height:12px; border-radius:50%; background:#2d2540; border:1px solid #3d3560; }
+.notch-light { width:8px; height:8px; border-radius:50%; background:#3d3560; border:1px solid #4d4570; }
+
+/* 状态栏 */
+.status-bar {
+  position:absolute; top:0; left:0; right:0; height:54px; z-index:150;
+  display:flex; align-items:flex-end; justify-content:space-between;
+  padding:0 28px 8px; font-size:12px; font-weight:600; color:var(--sub);
+}
+.status-time { font-size:15px; font-weight:700; color:var(--text); }
+.status-icons { display:flex; align-items:center; gap:5px; }
+.signal-bar { display:flex; align-items:flex-end; gap:1px; }
+.signal-bar span { background:var(--sub); width:3px; border-radius:1px; }
+.battery { width:22px; height:12px; border:1.5px solid var(--muted); border-radius:3px; position:relative; display:flex; align-items:center; }
+.battery::after { content:''; position:absolute; right:-4px; width:2px; height:5px; background:var(--muted); border-radius:0 1px 1px 0; }
+.battery-fill { height:8px; width:75%; background:#059669; border-radius:1px; margin:0 1px; }
+
+/* 背景粒子 */
+.bg-particles { position:absolute; inset:0; z-index:0; pointer-events:none; overflow:hidden; }
+.bgp {
+  position:absolute; border-radius:50%; opacity:0;
+  animation:bgpFloat linear infinite;
+  mix-blend-mode: multiply;
+}
+@keyframes bgpFloat {
+  0%   { transform:translateY(0) translateX(0) scale(1); opacity:0; }
+  8%   { opacity:var(--op); }
+  85%  { opacity:var(--op); }
+  100% { transform:translateY(var(--rise)) translateX(var(--drift)) scale(0.5); opacity:0; }
+}
+
+/* 主滚动区 */
+.app-scroll {
+  position:absolute; inset:0; overflow-y:auto; overflow-x:hidden;
+  -webkit-overflow-scrolling:touch; padding-bottom:110px;
+}
+.app-scroll::-webkit-scrollbar { display:none; }
+
+/* 导航 */
+.app-nav {
+  position:sticky; top:0; z-index:100; height:54px; padding:0 16px;
+  display:flex; align-items:flex-end; padding-bottom:10px;
+  background:transparent; transition:background .3s;
+}
+.app-nav.scrolled { background:rgba(12,12,20,0.95); backdrop-filter:blur(20px); border-bottom:1px solid var(--border); }
+.nav-btn {
+  width:34px; height:34px; border-radius:50%;
+  background:rgba(124,58,237,0.08); border:1px solid var(--border2);
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; font-size:15px; color:var(--sub); transition:all .15s;
+}
+.nav-btn:active { transform:scale(0.9); }
+.nav-actions { margin-left:auto; display:flex; gap:8px; }
+
+/* ── 预览图区 ── */
+.preview-block { padding:0 16px 12px; }
+.preview-main {
+  border-radius:20px; overflow:hidden;
+  border:1px solid var(--border);
+  box-shadow:0 6px 24px var(--shadow);
+  background:var(--card);
+  position:relative;
+}
+.preview-main img { width:100%; display:block; transition:opacity .3s; }
+
+/* 右侧覆盖标签列 - 随页面滚动 */
+.flag-col {
+  position:absolute;
+  right:0;
+  top:120px;
+  display:flex; flex-direction:column; gap:8px;
+  align-items:flex-end;
+  z-index:150;
+}
+.flag-tag {
+  cursor:pointer;
+  display:flex; align-items:center; gap:6px;
+  padding:8px 12px 8px 10px;
+  height:40px;
+  font-size:11px; font-weight:700;
+  color:var(--accent);
+  background:rgba(20,20,35,0.88);
+  backdrop-filter:blur(10px);
+  border:1.5px solid var(--accent);
+  border-radius:8px 0 0 8px;
+  transition:all .25s cubic-bezier(0.4,0,0.2,1);
+  box-shadow:-2px 2px 8px rgba(167,139,250,0.15);
+  transform-origin:right center;
+}
+/* 收起状态：只显示图标 */
+.flag-tag.collapsed {
+  padding:8px;
+  width:40px;
+  justify-content:center;
+  border-radius:6px 0 0 6px;
+}
+.flag-tag.collapsed .flag-text {
+  opacity:0;
+  width:0;
+  overflow:hidden;
+}
+/* 展开状态：显示文案，隐藏图标 */
+.flag-tag.expanded {
+  background:var(--accent);
+  color:#fff;
+  border-color:var(--accent);
+  box-shadow:-3px 3px 16px rgba(167,139,250,0.35);
+  padding-right:16px;
+}
+.flag-tag.expanded .flag-icon {
+  display:none;
+}
+.flag-tag:hover {
+  transform:translateX(-2px);
+}
+.flag-tag:active {
+  transform:translateX(-1px) scale(0.98);
+}
+.flag-icon {
+  font-size:16px;
+  flex-shrink:0;
+  transition:all .2s;
+}
+.flag-text {
+  white-space:nowrap;
+  transition:all .25s;
+}
+
+/* 左下角 9键/26键切换 */
+.kb-toggle {
+  position:absolute; left:10px; bottom:10px;
+  display:flex; gap:4px; z-index:5;
+}
+.kb-toggle-btn {
+  padding:4px 9px;
+  font-size:10px; font-weight:700;
+  border-radius:20px; cursor:pointer;
+  transition:all .18s;
+  border:1.5px solid rgba(255,255,255,0.6);
+  background:rgba(20,20,35,0.8);
+  backdrop-filter:blur(8px);
+  color:var(--muted);
+}
+.kb-toggle-btn.active {
+  background:var(--accent);
+  color:#fff;
+  border-color:var(--accent);
+  box-shadow:0 2px 8px rgba(124,58,237,0.3);
+}
+
+/* 预览图指示点 */
+.preview-dots {
+  position:absolute; bottom:10px; left:50%; transform:translateX(-50%);
+  display:flex; gap:5px; z-index:2;
+}
+.pdot {
+  width:6px; height:6px; border-radius:50%;
+  background:rgba(124,58,237,0.2); transition:all .2s; cursor:pointer;
+}
+.pdot.active { width:18px; border-radius:3px; background:var(--accent); }
+
+/* 皮肤信息 */
+.skin-info-block { padding:14px 20px 8px; }
+.skin-badges { display:flex; gap:6px; margin-bottom:10px; flex-wrap:wrap; overflow:visible; }
+.sb { padding:3px 10px; border-radius:20px; font-size:10px; font-weight:700; letter-spacing:.5px; }
+.sb-s { background:linear-gradient(90deg,var(--accent),var(--accent2)); color:#fff; }
+.sb-limit { background:linear-gradient(90deg,#f59e0b,#ef4444); color:#fff; }
+.sb-ip { background:rgba(124,58,237,0.1); color:var(--accent); border:1px solid var(--border2); }
+.skin-name { font-size:22px; font-weight:900; color:var(--text); margin-bottom:4px; }
+.skin-tagline { font-size:12px; color:var(--muted); }
+
+/* 内容区 */
+.content-area { padding:0 16px; }
+.section { margin-bottom:24px; }
+.sec-title { font-size:12px; font-weight:700; color:var(--muted); letter-spacing:1px; text-transform:uppercase; margin-bottom:12px; }
+
+/* 超级能力模块已整合到预览图区，移除独立样式 */
+.feat-wrapper { display:none; }
+.feat-row {
+  display:flex; gap:10px;
+  transition: transform .35s cubic-bezier(0.4,0,0.2,1);
+}
+.feat-row::-webkit-scrollbar { display:none; }
+.feat-card {
+  flex:0 0 calc((100% - 10px * 3.5) / 4.5);
+  min-width:0;
+  background:var(--card);
+  border:1.5px solid var(--border);
+  border-radius:16px; padding:14px 10px;
+  text-align:center; cursor:pointer;
+  transition:all .2s;
+  box-shadow:0 2px 8px var(--shadow);
+  position:relative; overflow:hidden;
+}
+.feat-arrow-hint {
+  position:absolute; right:-2px; top:0; bottom:0;
+  width:32px;
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; z-index:5;
+  background:linear-gradient(to right, transparent, rgba(12,12,20,0.85) 40%);
+}
+.feat-arrow-hint::after {
+  content:'';
+  display:block;
+  width:10px; height:10px;
+  border-top:2.5px solid var(--accent);
+  border-right:2.5px solid var(--accent);
+  transform:rotate(45deg) translateX(-2px);
+  animation:arrowPulse 1.6s ease-in-out infinite;
+  filter:drop-shadow(0 0 4px var(--accent));
+}
+.feat-arrow-hint.reverse::after { transform:rotate(-135deg) translateX(-2px); }
+@keyframes arrowPulse {
+  0%,100% { opacity:1; transform:rotate(45deg) translateX(-2px); }
+  50%      { opacity:0.5; transform:rotate(45deg) translateX(2px); }
+}
+.feat-card::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:2px;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+  opacity:0; transition:opacity .2s;
+}
+.feat-card.active {
+  border-color:var(--accent);
+  background:linear-gradient(160deg,#1c1c2a,#2a1f4a);
+  box-shadow:0 4px 16px rgba(124,58,237,0.15);
+}
+.feat-card.active::before { opacity:1; }
+.feat-card:active { transform:scale(0.96); }
+.feat-icon { font-size:22px; margin-bottom:7px; }
+.feat-name { font-size:11px; font-weight:700; color:var(--text); }
+
+/* 超级能力特效浮层 */
+.feat-effect-bar {
+  background:var(--card2); border:1px solid var(--border);
+  border-radius:14px; padding:14px 16px; margin-top:10px;
+  display:flex; align-items:center; gap:12px;
+  transition:all .3s; box-shadow:0 2px 8px var(--shadow);
+}
+.feat-effect-emoji { font-size:28px; }
+.feat-effect-title { font-size:13px; font-weight:700; color:var(--text); margin-bottom:3px; }
+.feat-effect-desc { font-size:11px; color:var(--muted); line-height:1.5; }
+
+/* 折叠详情 */
+.detail-accordion {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:14px; overflow:hidden; margin-bottom:8px;
+  box-shadow:0 2px 6px var(--shadow);
+}
+.detail-header {
+  padding:14px 16px; display:flex; justify-content:space-between; align-items:center;
+  cursor:pointer; transition:background .2s;
+}
+.detail-header:active { background:var(--bg2); }
+.detail-header-text { font-size:13px; font-weight:600; color:var(--text); }
+.detail-arrow { font-size:11px; color:var(--muted); transition:transform .3s; }
+.detail-accordion.open .detail-arrow { transform:rotate(180deg); }
+.detail-body { max-height:0; overflow:hidden; transition:max-height .4s ease; padding:0 16px; }
+.detail-accordion.open .detail-body { max-height:600px; padding:0 16px 14px; }
+.detail-body p { font-size:12px; color:var(--sub); line-height:1.7; }
+
+/* 价格模块 */
+.price-card {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:20px; padding:18px; box-shadow:0 4px 16px var(--shadow);
+}
+.price-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+.price-num {
+  font-size:36px; font-weight:900;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+}
+.price-orig { font-size:14px; color:var(--muted); text-decoration:line-through; margin-left:8px; }
+.discount-tag { padding:4px 10px; border-radius:20px; background:linear-gradient(90deg,#f59e0b,#ef4444); color:#fff; font-size:11px; font-weight:800; }
+.price-meta { display:flex; align-items:center; gap:6px; font-size:12px; color:var(--muted); }
+.pulse-dot { width:6px; height:6px; border-radius:50%; background:#f59e0b; animation:pdpulse 1.5s infinite; }
+@keyframes pdpulse { 0%,100%{opacity:1;} 50%{opacity:.3;} }
+.rating-row { display:flex; align-items:center; gap:10px; padding:14px 0 0; border-top:1px solid var(--border); margin-top:14px; }
+.rating-big { font-size:32px; font-weight:900; color:var(--text); }
+.rating-detail { flex:1; }
+.rating-stars { color:#f59e0b; font-size:16px; }
+.rating-count { font-size:11px; color:var(--muted); margin-top:2px; }
+.rating-bars { flex:2; display:flex; flex-direction:column; gap:3px; }
+.rbar { display:flex; align-items:center; gap:6px; }
+.rbar-label { font-size:10px; color:var(--muted); width:10px; text-align:right; }
+.rbar-track { flex:1; height:4px; background:rgba(255,255,255,0.06); border-radius:2px; }
+.rbar-fill { height:100%; border-radius:2px; background:linear-gradient(90deg,var(--accent),var(--accent2)); }
+
+/* 评论 */
+.review-item { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:14px; margin-bottom:10px; box-shadow:0 2px 6px var(--shadow); }
+.ri-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+.ri-user { display:flex; align-items:center; gap:8px; }
+.ri-avatar { width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:15px; background:linear-gradient(135deg,var(--accent),var(--accent2)); }
+.ri-name { font-size:13px; font-weight:600; color:var(--text); }
+.ri-stars { font-size:11px; color:#f59e0b; }
+.ri-text { font-size:13px; color:var(--sub); line-height:1.6; }
+.ri-tags { display:flex; gap:5px; flex-wrap:wrap; margin-top:8px; }
+.ri-tag { padding:2px 9px; border-radius:20px; font-size:10px; background:rgba(124,58,237,0.08); color:var(--accent); border:1px solid var(--border2); }
+
+/* 相关推荐 */
+.related-row { display:flex; gap:10px; overflow-x:auto; margin:0 -16px; padding:0 16px 4px; }
+.related-row::-webkit-scrollbar { display:none; }
+.rel-card { flex-shrink:0; width:110px; background:var(--card); border:1px solid var(--border); border-radius:14px; overflow:hidden; cursor:pointer; transition:all .2s; box-shadow:0 2px 6px var(--shadow); }
+.rel-card:active { transform:scale(0.96); }
+.rel-thumb { height:65px; display:flex; align-items:center; justify-content:center; font-size:26px; }
+.rel-body { padding:8px; }
+.rel-name { font-size:11px; font-weight:700; color:var(--text); margin-bottom:3px; }
+.rel-price { font-size:11px; font-weight:700; color:var(--accent); }
+
+/* 购买栏 */
+.buy-bar {
+  position:absolute; bottom:0; left:0; right:0; z-index:100;
+  background:rgba(12,12,20,0.97); backdrop-filter:blur(24px);
+  border-top:1px solid var(--border); padding:12px 16px 20px;
+}
+.buy-bar-inner { display:flex; align-items:center; gap:10px; }
+.buy-bar-price { flex:1; }
+.buy-bar-tag { font-size:10px; color:var(--muted); margin-bottom:2px; }
+.buy-bar-num { font-size:22px; font-weight:900; background:linear-gradient(90deg,var(--accent),var(--accent2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.buy-bar-orig { font-size:12px; color:var(--muted); text-decoration:line-through; margin-left:5px; }
+.btn-try { padding:0 18px; height:48px; border-radius:14px; background:rgba(124,58,237,0.08); border:1px solid var(--border2); color:var(--accent); font-size:14px; font-weight:700; cursor:pointer; white-space:nowrap; transition:all .15s; }
+.btn-try:active { transform:scale(0.94); }
+.btn-buy { position:relative; flex:1; height:48px; border-radius:14px; background:linear-gradient(90deg,var(--accent),var(--accent2)); border:none; color:#fff; font-size:16px; font-weight:800; cursor:pointer; transition:all .15s; box-shadow:0 4px 20px rgba(124,58,237,0.3); }
+.btn-buy:active { transform:scale(0.96); box-shadow:none; }
+.btn-buy.done { background:linear-gradient(90deg,#059669,#10b981); box-shadow:0 4px 20px rgba(5,150,105,0.3); }
+
+.btn-discount {
+  position:absolute; top:-8px; right:-8px;
+  background:linear-gradient(135deg,#ef4444,#dc2626);
+  color:#fff; font-size:11px; font-weight:800;
+  padding:4px 8px; border-radius:4px;
+  box-shadow:0 2px 8px rgba(239,68,68,0.4);
+  transform:rotate(8deg); z-index:1;
+}
+.btn-discount::before {
+  content:""; position:absolute; inset:-2px;
+  border:1.5px dashed rgba(255,255,255,0.5);
+  border-radius:4px; pointer-events:none;
+}
+
+/* Toast */
+.toast { position:absolute; bottom:120px; left:50%; background:rgba(5,150,105,0.95); backdrop-filter:blur(10px); color:#fff; padding:10px 20px; border-radius:24px; font-size:13px; font-weight:700; z-index:300; pointer-events:none; opacity:0; transition:opacity .3s, transform .3s; transform:translateX(-50%) translateY(10px); white-space:nowrap; }
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+/* 特效类（按键/浮层预览动画） */
+@keyframes featPulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.03);} }
+.feat-img-active { animation:featPulse .5s ease-in-out; }
+</style>
+</head>
+<body>
+<div class="phone-shell">
+<div class="phone-frame" id="phoneFrame">
+
+  <div class="bg-particles" id="bgParticles"></div>
+  <div class="phone-notch"><div class="notch-cam"></div><div class="notch-light"></div></div>
+  <div class="status-bar">
+    <span class="status-time" id="statusTime">9:41</span>
+    <div class="status-icons">
+      <div class="signal-bar">
+        <span style="height:4px"></span><span style="height:7px"></span>
+        <span style="height:10px"></span><span style="height:13px"></span>
+      </div>
+      <span style="font-size:11px">WiFi</span>
+      <div class="battery"><div class="battery-fill"></div></div>
+    </div>
+  </div>
+
+  <div class="app-scroll" id="appScroll">
+
+  <!-- 右侧能力标签 - 贴手机页面右边缘 -->
+  <div class="flag-col" id="flagCol">
+    <div class="flag-tag expanded" data-index="0" onclick="toggleFlagFeat(this,0)">
+      <span class="flag-icon">🎬</span>
+      <span class="flag-text">开场动画</span>
+    </div>
+    <div class="flag-tag collapsed" data-index="1" onclick="toggleFlagFeat(this,1)">
+      <span class="flag-icon">✨</span>
+      <span class="flag-text">按键特效</span>
+    </div>
+    <div class="flag-tag collapsed" data-index="2" onclick="toggleFlagFeat(this,2)">
+      <span class="flag-icon">🌊</span>
+      <span class="flag-text">浮层动画</span>
+    </div>
+    <div class="flag-tag collapsed" data-index="3" onclick="toggleFlagFeat(this,3)">
+      <span class="flag-icon">🌗</span>
+      <span class="flag-text">智能双色</span>
+    </div>
+    <div class="flag-tag collapsed" data-index="4" onclick="toggleFlagFeat(this,4)">
+      <span class="flag-icon">🔊</span>
+      <span class="flag-text">全局音效</span>
+    </div>
+  </div>
+
+    <!-- 导航 -->
+    <div class="app-nav" id="appNav" style="margin-top:54px">
+      <div class="nav-btn">←</div>
+      <div class="nav-actions">
+        <div class="nav-btn" onclick="doShare()" title="分享">↗</div>
+        <div class="nav-btn" id="heartBtn" onclick="toggleHeart()">♡</div>
+      </div>
+    </div>
+
+    <!-- 预览图 -->
+    <div class="preview-block">
+      <div class="preview-main" id="previewMain">
+        <img id="previewImg"
+          src="https://ime-res-download.xfinfr.com/contribute/abcb6d795c0c4e6dac19482fb75a9586/ef4be209-aa24-4f09-b48b-fa288e938a3a.gif"
+          alt="开场动画">
+
+        <!-- 左下角 9键/26键切换 -->
+        <div class="kb-toggle">
+          <div class="kb-toggle-btn active" id="kbBtn26" onclick="switchKbLayout('26')">26键</div>
+          <div class="kb-toggle-btn" id="kbBtn9" onclick="switchKbLayout('9')">9键</div>
+        </div>
+
+        <div class="preview-dots">
+          <div class="pdot active" onclick="switchPreview(0)"></div>
+          <div class="pdot" onclick="switchPreview(1)"></div>
+          <div class="pdot" onclick="switchPreview(2)"></div>
+          <div class="pdot" onclick="switchPreview(3)"></div>
+          <div class="pdot" onclick="switchPreview(4)"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 皮肤信息 -->
+    <div class="skin-info-block">
+      <div style="display:flex; align-items:baseline; gap:8px; flex-wrap:wrap;">
+        <div class="skin-name" style="margin-bottom:0;">暗影幻境 · 觉醒</div>
+        <span onclick="void 0" style="font-size:11px; color:#7c3aed; font-weight:600; cursor:pointer; text-decoration:underline; text-underline-offset:2px; text-decoration-color:rgba(124,58,237,0.4);">@暗影工作室 ↗</span>
+      </div>
+      <div class="skin-badges" style="margin-top:10px; margin-bottom:0;">
+        <span class="sb sb-s">超级皮肤</span>
+        <span class="sb sb-limit">限时特惠</span>
+        <span class="sb sb-ip">原创设计</span>
+        <span class="sb" style="background:transparent; color:var(--accent); border:1.5px solid var(--accent); border-radius:20px;">可爱</span>
+        <span class="sb" style="background:transparent; color:var(--accent); border:1.5px solid var(--accent); border-radius:20px;">复古</span>
+        <span class="sb" style="background:transparent; color:#db2777; border:1.5px solid #db2777; border-radius:20px;">粉色</span>
+      </div>
+    </div>
+
+    <div class="content-area" style="margin-top:18px">
+
+      <!-- 更多详情 -->
+      <div class="section">
+        <div class="sec-title">更多详情</div>
+        <div class="detail-accordion open" id="acc0">
+          <div class="detail-header" onclick="toggleAcc('acc0')">
+            <span class="detail-header-text">🎨 设计理念</span>
+            <span class="detail-arrow">▼</span>
+          </div>
+          <div class="detail-body">
+            <p>「梦幻浮层·轻盈」以云端梦境为灵感，采用柔和的渐变光晕与轻盈浮层动画，营造出如同漫步云间的输入体验。设计师历时30天精心打磨每一帧动效，力求让每次打字都充满诗意。</p>
+            <img src="https://ime-res-download.xfinfr.com/open-platform/36bb856d76b74773aab493c0f47945cd.png"
+              style="width:100%; border-radius:8px; display:block; margin-top:8px;">
+          </div>
+        </div>
+        <div class="detail-accordion" id="acc1">
+          <div class="detail-header" onclick="toggleAcc('acc1')">
+            <span class="detail-header-text">⚙️ 适配信息</span>
+            <span class="detail-arrow">▼</span>
+          </div>
+          <div class="detail-body">
+            <p>支持 iOS 15+ / Android 8.0+ 全机型适配，包含 9键、26键、手写、语音四种键盘形态。皮肤包体积约 10MB，低端机型也可流畅运行。</p>
+          </div>
+        </div>
+        <div class="detail-accordion" id="acc2">
+          <div class="detail-header" onclick="toggleAcc('acc2')">
+            <span class="detail-header-text">📦 购买须知</span>
+            <span class="detail-arrow">▼</span>
+          </div>
+          <div class="detail-body">
+            <p>购买后永久有效，支持云端同步换机不丢失。限时特惠价 ¥6.00（原价 ¥18.00），活动截止至本月底。不支持退款，若遇质量问题可联系客服处理。</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 用户评价 -->
+      <div class="section">
+                <div class="sec-title">用户评价</div>
+        <div class="price-card" style="margin-bottom:16px;">
+          <div class="rating-row" style="border-top:none; margin-top:0; padding-top:0;">
+            <div>
+              <div class="rating-big">4.9</div>
+              <div class="rating-stars">★★★★★</div>
+              <div class="rating-count">共 1,032 条评价</div>
+            </div>
+            <div class="rating-bars">
+              <div class="rbar"><span class="rbar-label">5</span><div class="rbar-track"><div class="rbar-fill" style="width:90%"></div></div></div>
+              <div class="rbar"><span class="rbar-label">4</span><div class="rbar-track"><div class="rbar-fill" style="width:7%"></div></div></div>
+              <div class="rbar"><span class="rbar-label">3</span><div class="rbar-track"><div class="rbar-fill" style="width:2%"></div></div></div>
+              <div class="rbar"><span class="rbar-label">2</span><div class="rbar-track"><div class="rbar-fill" style="width:1%"></div></div></div>
+              <div class="rbar"><span class="rbar-label">1</span><div class="rbar-track"><div class="rbar-fill" style="width:0%"></div></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="review-item">
+          <div class="ri-top">
+            <div class="ri-user">
+              <div class="ri-avatar">🌸</div>
+              <div><div class="ri-name">小柔</div><div class="ri-stars">★★★★★</div></div>
+            </div>
+            <span style="font-size:11px;color:var(--muted)">2天前</span>
+          </div>
+          <div class="ri-text">浮层动画真的太好看了！打字的时候有种在梦里的感觉，同事都被我种草了哈哈哈</div>
+          <div class="ri-tags"><span class="ri-tag">浮层好看</span><span class="ri-tag">治愈</span><span class="ri-tag">必买</span></div>
+        </div>
+        <div class="review-item">
+          <div class="ri-top">
+            <div class="ri-user">
+              <div class="ri-avatar">🦋</div>
+              <div><div class="ri-name">Yuki_M</div><div class="ri-stars">★★★★★</div></div>
+            </div>
+            <span style="font-size:11px;color:var(--muted)">1周前</span>
+          </div>
+          <div class="ri-text">开场动画每次都看不够！按键特效也超惊艳，浅色配色非常百搭，白天夜晚都好看。</div>
+          <div class="ri-tags"><span class="ri-tag">开场惊艳</span><span class="ri-tag">配色好看</span><span class="ri-tag">值得入</span></div>
+        </div>
+        <!-- 查看更多 -->
+        <div onclick="void 0" style="display:flex; align-items:center; justify-content:center; gap:6px; padding:12px 0 2px; cursor:pointer; opacity:0.7; transition:opacity .2s;" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.7'">
+          <span style="font-size:12px; color:var(--muted);">查看全部评价</span>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;">
+            <path d="M3 5.5L7 9.5L11 5.5" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- 相关推荐 -->
+      <div class="section">
+        <div class="sec-title">同风格推荐</div>
+        <div class="related-row">
+          <div class="rel-card">
+            <div class="rel-thumb" style="background:linear-gradient(135deg,#fdf2f8,#fce7f3)">🌷</div>
+            <div class="rel-body"><div class="rel-name">樱风恋语</div><div class="rel-price">¥9.00</div></div>
+          </div>
+          <div class="rel-card">
+            <div class="rel-thumb" style="background:linear-gradient(135deg,#eff6ff,#dbeafe)">☁️</div>
+            <div class="rel-body"><div class="rel-name">云端漫步</div><div class="rel-price">¥6.00</div></div>
+          </div>
+          <div class="rel-card">
+            <div class="rel-thumb" style="background:linear-gradient(135deg,#f0fdf4,#dcfce7)">🌿</div>
+            <div class="rel-body"><div class="rel-name">清晨微风</div><div class="rel-price">¥6.00</div></div>
+          </div>
+          <div class="rel-card">
+            <div class="rel-thumb" style="background:linear-gradient(135deg,#fffbeb,#fef3c7)">🌟</div>
+            <div class="rel-body"><div class="rel-name">星光午后</div><div class="rel-price">¥9.00</div></div>
+          </div>
+          <div class="rel-card">
+            <div class="rel-thumb" style="background:linear-gradient(135deg,#fdf4ff,#fae8ff)">🔮</div>
+            <div class="rel-body"><div class="rel-name">紫梦浮光</div><div class="rel-price">¥12.00</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="height:20px"></div>
+    </div>
+
+  </div><!-- /app-scroll -->
+
+  <!-- 底部购买栏 -->
+  <div class="buy-bar">
+    <div class="buy-bar-inner">
+      <div class="buy-bar-price">
+        <div class="buy-bar-tag">限时特惠价</div>
+        <span class="buy-bar-num">¥6</span>
+        <span class="buy-bar-orig">¥18</span>
+      </div>
+      <button class="btn-try">免费试用</button>
+      <button class="btn-buy" id="buyBtn" onclick="doBuy()"><span class="btn-discount">-67%</span>立即购买</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">🎉 购买成功！皮肤已解锁</div>
+
+</div>
+</div>
+
+<script>
+// 时钟
+function updateClock(){
+  const d=new Date(); let h=d.getHours(),m=d.getMinutes();
+  document.getElementById('statusTime').textContent=`${h}:${m<10?'0'+m:m}`;
+}
+updateClock(); setInterval(updateClock,10000);
+
+// 粒子
+const RICH_COLORS=[
+  '#7c3aed','#9333ea','#a855f7',  // 深紫
+  '#db2777','#ec4899','#f472b6',  // 深粉
+  '#2563eb','#3b82f6','#60a5fa',  // 深蓝
+  '#059669','#10b981','#34d399',  // 深绿
+  '#d97706','#f59e0b','#fbbf24',  // 深黄
+  '#ea580c','#f97316','#fb923c',  // 深橙
+  '#7e22ce','#c026d3','#e879f9',  // 洋红
+  '#0891b2','#06b6d4','#22d3ee',  // 深青
+  '#dc2626','#ef4444','#f87171',  // 深红
+];
+(function initBgParticles(){
+  const c=document.getElementById('bgParticles');
+  for(let i=0;i<35;i++){
+    const p=document.createElement('div'); p.className='bgp';
+    const size=4+Math.random()*6, left=Math.random()*100, bottom=Math.random()*100;
+    const dur=8+Math.random()*14, delay=-(Math.random()*dur);
+    const rise=-(100+Math.random()*600)+'px', drift=(Math.random()-.5)*100+'px';
+    const op=(0.55+Math.random()*0.35).toFixed(2);
+    const color=RICH_COLORS[Math.floor(Math.random()*RICH_COLORS.length)];
+    p.style.cssText=`width:${size}px;height:${size}px;left:${left}%;bottom:${bottom}%;background:${color};animation-duration:${dur}s;animation-delay:${delay}s;--rise:${rise};--drift:${drift};--op:${op};box-shadow:0 0 ${size*3}px ${color}88;`;
+    c.appendChild(p);
+  }
+})();
+
+// 滚动导航变色
+document.getElementById('appScroll').addEventListener('scroll',function(){
+  document.getElementById('appNav').classList.toggle('scrolled',this.scrollTop>60);
+});
+
+// 预览图切换（3张）
+const PREVIEW_IMGS=[
+  'https://ime-res-download.xfinfr.com/contribute/abcb6d795c0c4e6dac19482fb75a9586/ef4be209-aa24-4f09-b48b-fa288e938a3a.gif',
+  'https://ime-res-download.xfinfr.com/contribute/83cab0b2f99c45f9a7c193d83d38b8a2/2a55463c-636e-4bfe-9dd9-088581572d75.png',
+  'https://ime-res-download.xfinfr.com/contribute/d72809b0134c4fc7b0218f4fac9a55f3/dd5a5770-12e4-4cc1-86cc-cba2fc10bc7d.png',
+  'https://ime-res-download.xfinfr.com/contribute/53e0d958dc73476891b2a95788477729/63f34218-d81d-4efb-9d08-80ea9c67c453.png',
+  'https://ime-res-download.xfinfr.com/contribute/861ae4796a06461398b7c7bba3e54ee4/2bbb3a82-6606-453f-bfd4-159f7441243e.png',
+];
+let curPreview=0;
+function switchPreview(idx){
+  curPreview=idx;
+  const img=document.getElementById('previewImg');
+  img.style.opacity='0';
+  setTimeout(()=>{ img.src=PREVIEW_IMGS[idx]; img.style.opacity='1'; },200);
+  document.querySelectorAll('.pdot').forEach((d,i)=>d.classList.toggle('active',i===idx));
+}
+
+// 超级能力卡片
+const FEAT_DATA=[
+  { title:'开场动画', preview:0 },
+  { title:'按键特效', preview:1 },
+  { title:'浮层动画', preview:2 },
+  { title:'智能双色', preview:3 },
+  { title:'全局音效', preview:4 },
+];
+let featOffset = 0;
+
+// 旗帜标签点击 - 新版展开/收起逻辑
+function toggleFlagFeat(el, idx){
+  // 如果点击的是已展开的标签，不做任何操作
+  if(el.classList.contains('expanded')) return;
+
+  // 收起所有标签
+  document.querySelectorAll('.flag-tag').forEach(t => {
+    t.classList.remove('expanded');
+    t.classList.add('collapsed');
+  });
+
+  // 展开当前点击的标签
+  el.classList.remove('collapsed');
+  el.classList.add('expanded');
+
+  // 切换预览图
+  const f = FEAT_DATA[idx];
+  switchPreview(f.preview);
+}
+
+// 保留旧函数以兼容
+function activeFlagFeat(el, idx){
+  toggleFlagFeat(el, idx);
+}
+
+// 9键/26键切换
+function switchKbLayout(layout){
+  document.getElementById('kbBtn26').classList.toggle('active', layout==='26');
+  document.getElementById('kbBtn9').classList.toggle('active', layout==='9');
+}
+
+function activeFeat(el, idx){
+  document.querySelectorAll('.feat-card').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  const f = FEAT_DATA[idx];
+  switchPreview(f.preview);
+  const row = document.getElementById('featRow');
+  const cardW = row.offsetWidth / 4.5;
+  const step = cardW + 10;
+  const targetOffset = idx <= 1 ? 0 : (idx - 2) * step;
+  const maxOffset = (FEAT_DATA.length - 4) * step;
+  featOffset = Math.min(targetOffset, maxOffset < 0 ? 0 : maxOffset);
+  row.style.transform = `translateX(-${featOffset}px)`;
+  const arrow = document.getElementById('featArrow');
+  if(featOffset >= maxOffset && maxOffset > 0){ arrow.classList.add('reverse'); }
+  else { arrow.classList.remove('reverse'); }
+}
+function flipFeatPage(){
+  const row = document.getElementById('featRow');
+  const arrow = document.getElementById('featArrow');
+  const cardW = row.offsetWidth / 4.5;
+  const step = cardW + 10;
+  const maxOffset = (FEAT_DATA.length - 4) * step;
+  if(featOffset < maxOffset){
+    featOffset = Math.min(featOffset + step, maxOffset);
+    arrow.classList.remove('reverse');
+    if(featOffset >= maxOffset) arrow.classList.add('reverse');
+  } else {
+    featOffset = 0;
+    arrow.classList.remove('reverse');
+  }
+  row.style.transform = `translateX(-${featOffset}px)`;
+}
+
+// 折叠详情
+function toggleAcc(id){
+  const acc=document.getElementById(id);
+  acc.classList.toggle('open');
+}
+
+// 收藏
+let hearted=false;
+function toggleHeart(){
+  hearted=!hearted;
+  const btn=document.getElementById('heartBtn');
+  btn.textContent=hearted?'♥':'♡';
+  btn.style.color=hearted?'var(--accent2)':'';
+}
+
+// 购买
+let bought=false;
+function doBuy(){
+  if(bought)return;
+  bought=true;
+  const btn=document.getElementById('buyBtn');
+  btn.textContent='✓ 已购买'; btn.classList.add('done');
+  const t=document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2600);
+  if(!hearted){ hearted=true; document.getElementById('heartBtn').textContent='♥'; document.getElementById('heartBtn').style.color='var(--accent2)'; }
+}
+</script>
+</body>
+</html>
+
+
+
