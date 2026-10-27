@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>抠盒 App Demo</title>
+  <style>
+    :root{--ink:#171717;--muted:#777;--line:#dcdcdc;--bg:#f6f6f6;--card:#fff;--soft:#f0f0f0;--accent:#222}
+    *{box-sizing:border-box} body{margin:0;background:#e9e9e9;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Microsoft YaHei","Noto Sans SC",sans-serif}
+    .stage{min-height:100vh;display:grid;place-items:center;padding:24px}
+    .phone{width:390px;height:844px;background:var(--bg);border:10px solid #111;border-radius:42px;overflow:hidden;box-shadow:0 18px 60px #0002;position:relative}
+    .notch{width:118px;height:25px;background:#111;border-radius:0 0 16px 16px;position:absolute;top:0;left:50%;transform:translateX(-50%);z-index:4}
+    .app{height:100%;display:flex;flex-direction:column;padding-top:27px}
+    .topbar{height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;border-bottom:1px solid var(--line);background:#fff}
+    .topbar h1{font-size:17px;margin:0;font-weight:700}.back{border:0;background:none;font-size:16px;padding:4px 0;cursor:pointer;color:var(--ink)}
+    .content{flex:1;overflow:auto;padding:20px}.view{display:none;height:100%}.view.active{display:block}
+    .home{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;gap:20px}.home .mark{width:90px;height:90px;border:2px solid var(--ink);border-radius:28px;display:grid;place-items:center;font-size:37px;font-weight:700}.home h2{font-size:27px;margin:0}.home p{color:var(--muted);font-size:14px;margin:0 0 14px}
+    button{font:inherit;cursor:pointer}.primary{background:var(--ink);color:#fff;border:0;border-radius:13px;padding:14px 22px;font-weight:700}.secondary{background:#fff;color:var(--ink);border:1px solid var(--ink);border-radius:13px;padding:13px 20px;font-weight:700}
+    .progress-wrap{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:18px}.row{display:flex;justify-content:space-between;align-items:center}.muted{color:var(--muted)}.progress{height:8px;background:#e8e8e8;border-radius:8px;overflow:hidden;margin-top:12px}.progress i{display:block;height:100%;width:33%;background:var(--ink);border-radius:8px;transition:width .25s}
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0 22px}.cell{aspect-ratio:1;border:1px solid #aaa;border-radius:13px;background:#fff;display:grid;place-items:center;font-size:30px;font-weight:700;transition:.15s}.cell.open{background:#222;color:#fff;border-color:#222;font-size:14px}.cell:disabled{cursor:default}
+    .actions{display:grid;grid-template-columns:1fr 1fr;gap:12px}.hint{font-size:12px;color:var(--muted);line-height:1.6;margin-top:16px}.result-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px;text-align:center;margin-top:35px}.result-card .badge{display:inline-flex;padding:5px 10px;border:1px solid var(--ink);border-radius:99px;font-size:12px}.result-card h2{margin:14px 0 6px;font-size:26px}.result-card p{margin:0;color:var(--muted);font-size:14px}.spin{height:150px;display:grid;place-items:center;margin-top:55px}.spinner{width:58px;height:58px;border:4px solid #ddd;border-top-color:#222;border-radius:50%;animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+    .bag-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:22px}.skin{background:#fff;border:1px solid var(--line);border-radius:15px;padding:14px}.thumb{height:100px;border-radius:10px;background:#ececec;display:grid;place-items:center;font-size:27px;font-weight:700}.skin b{display:block;margin-top:11px}.skin small{color:var(--muted)}.skin button{width:100%;margin-top:12px;padding:9px;border-radius:10px;border:1px solid #222;background:#fff}
+    .toast{position:absolute;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:#222;color:#fff;border-radius:9px;padding:10px 14px;font-size:12px;opacity:0;pointer-events:none;transition:.25s;white-space:nowrap}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+    .footer{font-size:11px;color:#aaa;text-align:center;margin-top:22px}
+  </style>
+</head>
+<body>
+<main class="stage"><section class="phone"><div class="notch"></div><div class="app">
+  <header class="topbar"><button class="back" id="back">‹</button><h1 id="title">首页</h1><span style="width:22px"></span></header>
+  <div class="content">
+    <section id="home" class="view active"><div class="home"><div class="mark">盒</div><h2>抠盒</h2><p>打开未知，收集喜欢的皮肤</p><button class="primary" id="enter">进入抠盒</button><div class="footer">固定入口 · Demo</div></div></section>
+    <section id="play" class="view"><div class="progress-wrap"><div class="row"><b>当前进度</b><span class="muted" id="count">3 / 9 格</span></div><div class="progress"><i id="bar"></i></div><div class="hint">✓ 已开出　　× 未开出<br>每次抽取揭晓一格，端盒可一次完成</div></div><div class="grid" id="grid"></div><div class="actions"><button class="secondary" id="draw">一抽</button><button class="primary" id="box">端盒</button></div><p class="hint">提示：累计抠满 5 格，可额外领取限定款奖励。</p></section>
+    <section id="anim" class="view"><div class="spin"><div class="spinner"></div></div><div style="text-align:center"><h2>抠盒动效</h2><p class="muted">正在揭晓本次结果…</p></div></section>
+    <section id="result" class="view"><div class="result-card"><span class="badge" id="resultTag">普通款</span><h2 id="resultName">星夜薄荷</h2><p id="resultDesc">皮肤已存入背包 / 图鉴</p><button class="primary" style="margin-top:22px" id="toBag">去背包 / 图鉴</button></div></section>
+    <section id="bag" class="view"><p class="muted" style="margin-top:2px">已收集皮肤 · 3</p><div class="bag-grid"><div class="skin"><div class="thumb">星</div><b>星夜薄荷</b><small>普通款</small><button onclick="useSkin(this)">启用</button></div><div class="skin"><div class="thumb">月</div><b>月光银</b><small>隐藏款</small><button onclick="useSkin(this)">启用</button></div><div class="skin"><div class="thumb">限</div><b>限定礼盒</b><small>限定款</small><button onclick="useSkin(this)">启用</button></div></div></section>
+  </div>
+  <div class="toast" id="toast"></div>
+</div></section></main>
+<script>
+  const views={home:'首页',play:'抠盒主玩法页',anim:'抠盒动效',result:'结果',bag:'背包 / 图鉴页'};let current='home',opened=3,draws=0,lastResult='普通款';
+  const $=id=>document.getElementById(id);const toast=t=>{ $('toast').textContent=t;$('toast').classList.add('show');setTimeout(()=>$('toast').classList.remove('show'),1500)};
+  function show(v){current=v;Object.keys(views).forEach(k=>$(k).classList.toggle('active',k===v));$('title').textContent=views[v];$('back').style.visibility=v==='home'?'hidden':'visible';if(v==='play')renderGrid();}
+  function renderGrid(){const g=$('grid');g.innerHTML='';for(let i=0;i<9;i++){const b=document.createElement('button');b.className='cell'+(i<3?' open':'');b.disabled=i<3;b.textContent=i<3?'已开':'?';b.onclick=()=>openOne(b);g.appendChild(b)}$('count').textContent=opened+' / 9 格';$('bar').style.width=(opened/9*100)+'%';}
+  function openOne(b){if(opened>=9)return; b.classList.add('open');b.textContent='已开';opened++;draws++;$('count').textContent=opened+' / 9 格';$('bar').style.width=(opened/9*100)+'%';playResult(opened>=5?'限定款':(draws%4===0?'隐藏款':'普通款'));}
+  function playResult(kind){lastResult=kind;show('anim');setTimeout(()=>{ $('resultTag').textContent=kind;$('resultName').textContent=kind==='隐藏款'?'月光银':kind==='限定款'?'限定礼盒':'星夜薄荷';$('resultDesc').textContent=kind==='隐藏款'?'隐藏款已获得，已存入背包 / 图鉴':kind==='限定款'?'累计抠满 5 格，额外奖励已发放':'皮肤已存入背包 / 图鉴';show('result');},850)}
+  $('enter').onclick=()=>show('play');$('draw').onclick=()=>{if(opened>=9){toast('本盒已全部开启');return}let next=[...$('grid').children].find(x=>!x.disabled);if(next)openOne(next)};$('box').onclick=()=>{if(opened>=9){toast('本盒已全部开启');return}show('anim');setTimeout(()=>{opened=9;draws++;lastResult='限定款';$('resultTag').textContent='端盒奖励';$('resultName').textContent='限定礼盒';$('resultDesc').textContent='端盒完成，皮肤已存入背包 / 图鉴';show('result');},1000)};$('toBag').onclick=()=>show('bag');$('back').onclick=()=>show(current==='bag'?'result':current==='result'?'play':current==='play'?'home':'play');
+  function useSkin(btn){document.querySelectorAll('.skin button').forEach(b=>{b.textContent='启用';b.style.background='#fff';b.style.color='#222'});btn.textContent='已启用';btn.style.background='#222';btn.style.color='#fff';toast('皮肤已启用')}
+  show('home');
+</script>
+</body></html>
